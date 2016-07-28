@@ -1,0 +1,39 @@
+{
+    "author": "jjv360",
+    "dependencies": {},
+    "keywords": [],
+    "name": "sal",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "Sal",
+        "enableMultiJS": true,
+        "messageKeys": {
+            "action": 0,
+            "text": 1
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/Menu Icon",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_ICON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "09cc0007-fdeb-496d-a898-9cf3cde051a8",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.5.0"
+}
