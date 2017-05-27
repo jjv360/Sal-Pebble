@@ -3,9 +3,9 @@
 
 var SERVER_ADDRESS = "https://x41em8mtq8.execute-api.us-east-1.amazonaws.com/prod";
 
-module.exports = class Request {
+module.exports = {
 
-	static get(endpoint) {
+	get: function(endpoint) {
 
 		// Send request
 		return Request.sendRaw("GET", SERVER_ADDRESS + endpoint, null).then(xhr => {
@@ -27,9 +27,9 @@ module.exports = class Request {
 
 		});
 
-	}
+	},
 
-	static download(url) {
+	download: function(url) {
 
 		// Send request
 		return Request.sendRaw("GET", url, null).then(xhr => {
@@ -39,9 +39,9 @@ module.exports = class Request {
 
 		});
 
-	}
+	},
 
-	static sendRaw(method, url, payload) {
+	sendRaw: function(method, url, payload) {
 
 		return new Promise((onSuccess, onFail) => {
 

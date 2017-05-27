@@ -1,18 +1,14 @@
 //
 // Response - A possible response to user input
 
-module.exports = class Response {
+module.exports = function Response() {
 
-	constructor() {
+	// Set properties
+	this.confidence = 0;
 
-		// Set properties
-		this.confidence = 0;
-
-		// Events
-		this.execute = function() {
-			console.log("SAL: Response execute block not set!");
-		};
-
-	}
+	// Events
+	this.execute = function() {
+		console.log("SAL: Response execute block not set!");
+	};
 
 }

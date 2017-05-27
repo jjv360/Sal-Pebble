@@ -3,34 +3,18 @@
 
 var SHA256 = require("crypto-js/sha256");
 
-module.exports = class Hash {
+module.exports = function Hash() {
 
-	get ID() {
-		return "core.security.hash";
-	}
+	// Properties
+	this.ID = "core.security.hash";
+	this.name = "Hashing functions";
+	this.description = "Provides hashing functions.";
+	this.version = 1;
+	this.author = "jjv360";
+	this.dependencies = [];
 
-	get name() {
-		return "Hashing functions";
-	}
+}
 
-	get description() {
-		return "Provides hashing functions.";
-	}
-
-	get version() {
-		return 1;
-	}
-
-	get author() {
-		return "jjv360";
-	}
-
-	get dependencies() {
-		return [];
-	}
-
-	sha256(input) {
-		return SHA256(input);
-	}
-
+module.exports.prototype.sha256 = function(input) {
+	return SHA256(input);
 }

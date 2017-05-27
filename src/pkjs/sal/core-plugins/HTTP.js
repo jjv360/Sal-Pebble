@@ -1,85 +1,61 @@
 
-module.exports = class HTTP {
+module.exports = function HTTP(sal) {
 
-	get ID() {
-		return "core.network.http";
-	}
+	// Properties
+	this.ID = "core.network.http";
+	this.name = "HTTP Support";
+	this.description = "Sends HTTP requests.";
+	this.version = 1;
+	this.author = "jjv360";
+	this.dependencies = [];
+	this.sal = sal;
 
-	get name() {
-		return "HTTP Support";
-	}
+/** Sends a GET HTTP request. @returns Promise */
+module.exports.prototype.get = function(url, customHeaders) {
+	return this.send("GET", url, null, customHeaders);
+}
 
-	get description() {
-		return "Sends HTTP requests.";
-	}
+/** Sends a POST HTTP request. @returns Promise */
+module.exports.prototype.post = function(url, body, customHeaders) {
+	return this.send("POST", url, body, customHeaders);
+}
 
-	get version() {
-		return 1;
-	}
+/** Sends an HTTP request @returns Promise */
+module.exports.prototype.send = function(method, url, body, customHeaders) {
 
-	get author() {
-		return "jjv360";
-	}
+	// Check vars
+	customHeaders = customHeaders || {};
 
-	get dependencies() {
-		return [];
-	}
+	// Check that body is a string
+	if (typeof body == "object")
+		body = JSON.stringify(body);
 
-	constructor(sal) {
+	// Return promise
+	return new Promise((onSuccess, onFail) => {
 
-		// Set properties
-		this.sal = sal;
+		// Create XHR
+		var xhr = new XMLHttpRequest();
 
-	}
+		// Open request
+		xhr.open(method, url);
 
-	/** Sends a GET HTTP request. @returns Promise */
-	get(url, customHeaders) {
-		return this.send("GET", url, null, customHeaders);
-	}
+		// Set headers
+		for (var header in customHeaders)
+			xhr.setRequestHeader(header, customHeaders[header]);
 
-	/** Sends a POST HTTP request. @returns Promise */
-	post(url, body, customHeaders) {
-		return this.send("POST", url, body, customHeaders);
-	}
+		// Send request
+		xhr.send(body);
 
-	/** Sends an HTTP request @returns Promise */
-	send(method, url, body, customHeaders) {
+		// Add load handler
+		xhr.onload = () => {
+			onSuccess(xhr.responseText);
+		}
 
-		// Check vars
-		customHeaders = customHeaders || {};
+		// Add error handler
+		xhr.onerror = (err) => {
+			onFail("Error " + xhr.status);
+		}
 
-		// Check that body is a string
-		if (typeof body == "object")
-			body = JSON.stringify(body);
-
-		// Return promise
-		return new Promise((onSuccess, onFail) => {
-
-			// Create XHR
-			var xhr = new XMLHttpRequest();
-
-			// Open request
-			xhr.open(method, url);
-
-			// Set headers
-			for (var header in customHeaders)
-				xhr.setRequestHeader(header, customHeaders[header]);
-
-			// Send request
-			xhr.send(body);
-
-			// Add load handler
-			xhr.onload = () => {
-				onSuccess(xhr.responseText);
-			}
-
-			// Add error handler
-			xhr.onerror = (err) => {
-				onFail("Error " + xhr.status);
-			}
-
-		});
-
-	}
+	});
 
 }

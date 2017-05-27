@@ -1,56 +1,31 @@
 //
 // Hash - Provides access to hashing functions
 
-module.exports = class CronPlugin {
+module.exports = function CronPlugin() {
 
-	constructor() {
+	// Properties
+	this.jobs = {};
+	this.ID = "core.cron";
+	this.name = "Cron Job Runner";
+	this.description = "Executes cron jobs.";
+	this.version = 1;
+	this.author = "jjv360";
+	this.dependencies = [];
+	this.canRunInBackground = false;
 
-		// Properties
-		this.jobs = {};
+}
 
-	}
+/** Schedules a recurring task to execute, or updates an existing one if the taskID already exists. */
+module.exports.prototype.schedule = function(taskID, pluginID, functionName, interval, repeatCount, customData) {
 
-	get ID() {
-		return "core.cron";
-	}
-
-	get name() {
-		return "Cron Job Runner";
-	}
-
-	get description() {
-		return "Executes cron jobs.";
-	}
-
-	get version() {
-		return 1;
-	}
-
-	get author() {
-		return "jjv360";
-	}
-
-	get dependencies() {
-		return [];
-	}
-
-	get canRunInBackground() {
-		return false;
-	}
-
-	/** Schedules a recurring task to execute, or updates an existing one if the taskID already exists. */
-	schedule(taskID, pluginID, functionName, interval, repeatCount, customData) {
-
-		// Schedule task
-		this.jobs[taskID] = {
-			pluginID: pluginID,
-			functionName: functionName,
-			interval: interval,
-			repeatCount: repeatCount,
-			customData: customData,
-			lastRun: Date.now()
-		};
-
-	}
+	// Schedule task
+	this.jobs[taskID] = {
+		pluginID: pluginID,
+		functionName: functionName,
+		interval: interval,
+		repeatCount: repeatCount,
+		customData: customData,
+		lastRun: Date.now()
+	};
 
 }
