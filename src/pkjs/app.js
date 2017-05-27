@@ -1,3 +1,5 @@
+"use strict";
+
 //
 // App's main Javascript file
 
