@@ -14,7 +14,7 @@ module.exports = function Sal(appID) {
 
 	// Events
 	this.onoutput = null;
-	
+
 };
 
 module.exports.prototype.init = function() {
@@ -38,6 +38,8 @@ module.exports.prototype.loadLocalPlugins = function() {
 	pluginLoad(require("./core-plugins/HTTP"));
 	pluginLoad(require("./core-plugins/Storage"));
 	pluginLoad(require("./core-plugins/core.cron"));
+	pluginLoad(require("./core-plugins/core.speech.input"));
+	pluginLoad(require("./core-plugins/core.speech.output"));
 	pluginLoad(require("./core-plugins/com.jjv360.native-location-html5"));
 
 	// Load plugins from cache
@@ -56,7 +58,6 @@ module.exports.prototype.loadRemotePlugins = function() {
 	Request.get("/plugins/list").then(function(items) {
 
 		// Load plugins
-		console.log("SAL: Loading " + items.length + " plugins");
 		for (var i = 0 ; i < items.length ; i++)
 			this.loadRemotePlugin(items[i]);
 
@@ -71,7 +72,6 @@ module.exports.prototype.loadRemotePlugins = function() {
 module.exports.prototype.loadRemotePlugin = function(info) {
 
 	// Stop if not valid
-	console.debug("Attempting to load plugin " + JSON.stringify(info));
 	if (!info.valid)
 		return;
 
@@ -95,7 +95,7 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 	}.bind(this)).catch(function(err) {
 
 		// Failed
-		console.warn("SAL: Unable to load plugin from " + info.url);
+		console.warn("SAL: Unable to load plugin from " + info.url + ", " + err);
 		console.warn(err);
 
 	});
@@ -103,7 +103,7 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 };
 
 module.exports.prototype.runPlugin = function(code) {
-	
+
 	// ES5ify the code, since we're running on an ancient JavaScript system here :/
 	code = Babel.transform(code, { presets: ['es2015'] }).code;
 
@@ -261,36 +261,3 @@ module.exports.prototype.removeEventListener = function(event, callback) {
 		}
 	}
 };
-
-if (!Array.prototype.includes) {
-  Array.prototype.includes = function(searchElement /*, fromIndex*/) {
-    'use strict';
-    if (this == null) {
-      throw new TypeError('Array.prototype.includes called on null or undefined');
-    }
-
-    var O = Object(this);
-    var len = parseInt(O.length, 10) || 0;
-    if (len === 0) {
-      return false;
-    }
-    var n = parseInt(arguments[1], 10) || 0;
-    var k;
-    if (n >= 0) {
-      k = n;
-    } else {
-      k = len + n;
-      if (k < 0) {k = 0;}
-    }
-    var currentElement;
-    while (k < len) {
-      currentElement = O[k];
-      if (searchElement === currentElement ||
-         (searchElement !== searchElement && currentElement !== currentElement)) { // NaN !== NaN
-        return true;
-      }
-      k++;
-    }
-    return false;
-  };
-}
