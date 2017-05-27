@@ -2,10 +2,9 @@
 // Sal - Main class
 
 var Request = require('./Request');
-var UIPlugin = require('./core-plugins/UI');
-var HashPlugin = require('./core-plugins/Hash');
-var HTTPPlugin = require('./core-plugins/HTTP');
 var localforage = require('localforage');
+var Babel = require("babel-standalone");
+
 
 module.exports = function Sal(appID) {
 
@@ -24,45 +23,46 @@ module.exports = function Sal(appID) {
 	this.loadLocalPlugins();
 	this.loadRemotePlugins();
 
-}
+};
 
 module.exports.prototype.loadLocalPlugins = function() {
 
 	// Load core plugins
-	var pluginLoad = Plugin => this.addPlugin(new Plugin.default(this));
-	require(["./core-plugins/UI"], pluginLoad);
-	require(["./core-plugins/Hash"], pluginLoad);
-	require(["./core-plugins/HTTP"], pluginLoad);
-	require(["./core-plugins/Storage"], pluginLoad);
-	require(["./core-plugins/core.cron"], pluginLoad);
-	require(["./core-plugins/com.jjv360.native-location-html5"], pluginLoad);
+	console.debug("SAL: Loading local plugins...");
+	var pluginLoad = function(Plugin) { Plugin = Plugin && Plugin.default || Plugin; this.addPlugin( new Plugin(this)); }.bind(this);
+	pluginLoad(require("./core-plugins/UI"));
+	pluginLoad(require("./core-plugins/Hash"));
+	pluginLoad(require("./core-plugins/HTTP"));
+	pluginLoad(require("./core-plugins/Storage"));
+	pluginLoad(require("./core-plugins/core.cron"));
+	pluginLoad(require("./core-plugins/com.jjv360.native-location-html5"));
 
 	// Load plugins from cache
-	this.pluginDataCache.iterate((value, key) => {
+	this.pluginDataCache.iterate(function (value, key) {
 
 		// Run plugin
-		var plugin = this.runPlugin(value);
+		this.runPlugin(value);
 
-	});
+	}.bind(this));
 
-}
+};
 
 module.exports.prototype.loadRemotePlugins = function() {
 
 	console.debug("SAL: Fetching plugin list");
-	Request.get("/plugins/list").then((items) => {
+	Request.get("/plugins/list").then(function (items) {
 
 		// Load plugins
-		for (var pluginInfo of items)
-			this.loadRemotePlugin(pluginInfo);
+		for (var i = 0 ; i < items.length ; i++)
+			this.loadRemotePlugin(items[i]);
 
-	}).catch((error) => {
+	}.bind(this)).catch(function(error) {
 
 		console.warn("SAL: Unable to fetch plugins. " + error.errorText);
 
-	});
+	}.bind(this));
 
-}
+};
 
 module.exports.prototype.loadRemotePlugin = function(info) {
 
@@ -71,23 +71,23 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 		return;
 
 	// Stop if we have it already
-	for (var p of this.plugins)
-		if (p.ID == info.id && p.version == info.version)
+	for (var i = 0 ; i < this.plugins.length ; i++)
+		if (this.plugins[i].ID == info.id && this.plugins[i].version == info.version)
 			return;
 
 	// Download it
 	console.debug("SAL: Downloading plugin " + info.id + " version " + info.version);
-	Request.download(info.url).then(js => {
+	Request.download(info.url).then(function(js) {
 
 		// Execute plugin
 		var plugin = this.runPlugin(js);
 
 		// Everything went well, store plugin code for offline access
-		this.pluginDataCache.setItem(plugin.ID, js).then(() => {
+		this.pluginDataCache.setItem(plugin.ID, js).then(function() {
 			console.debug("SAL: Stored plugin data for " + plugin.ID);
 		});
 
-	}).catch(err => {
+	}.bind(this)).catch(function(err) {
 
 		// Failed
 		console.warn("SAL: Unable to load plugin from " + info.url);
@@ -95,9 +95,12 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 
 	});
 
-}
+};
 
 module.exports.prototype.runPlugin = function(code) {
+	
+	// ES5ify the code, since we're running on an ancient JavaScript system here :/
+	code = Babel.transform(code, { presets: ['es2015'] }).code;
 
 	// Execute code
 	var module = {};
@@ -111,7 +114,7 @@ module.exports.prototype.runPlugin = function(code) {
 	this.addPlugin(newPlugin);
 	return newPlugin;
 
-}
+};
 
 module.exports.prototype.addPlugin = function(plugin) {
 
@@ -128,14 +131,14 @@ module.exports.prototype.addPlugin = function(plugin) {
 	// Check plugin dependencies before loading
 	this.checkPluginDependencies(plugin);
 
-}
+};
 
 module.exports.prototype.checkAllPluginDependencies = function() {
 
-	for (var plugin of this.plugins)
-		this.checkPluginDependencies(plugin);
+	for (var i = 0 ; i < this.plugins.length ; i++)
+		this.checkPluginDependencies(this.plugins[i]);
 
-}
+};
 
 module.exports.prototype.checkPluginDependencies = function(plugin) {
 
@@ -144,59 +147,60 @@ module.exports.prototype.checkPluginDependencies = function(plugin) {
 		return;
 
 	// Check if all dependencies are loaded
-	for (var depID of plugin.dependencies || []) {
+	var deps = plugin.dependencies || [];
+	for (var i = 0 ; i < deps.length ; i++) {
 
 		// Check if loaded
-		var dep = this.getPlugin(depID);
+		var dep = this.getPlugin(deps[i]);
 		if (!dep || !dep._isLoaded)
 			return;
 
 	}
 
 	// Load
-	plugin.load && plugin.load(this);
+	if (plugin.load) plugin.load(this);
 	plugin._isLoaded = true;
 	plugin._waitingForDependencies = false;
 	console.debug("SAL: Loaded plugin " + plugin.ID);
 
 	// Send resume message
-	plugin.resume && plugin.resume(this);
+	if (plugin.resume) plugin.resume(this);
 
 	// Check all dependencies again
 	this.checkAllPluginDependencies();
 
-}
+};
 
 module.exports.prototype.getPlugins = function() {
 
 	// Find all loaded plugins
 	var all = [];
-	for (var plugin of this.plugins)
-		if (plugin._isLoaded)
-			all.push(plugin);
+	for (var i = 0 ; i < this.plugins.length ; i++)
+		if (this.plugins[i]._isLoaded)
+			all.push(this.plugins[i]);
 
 	// Done
 	return all;
 
-}
+};
 
 module.exports.prototype.getPlugin = function(id) {
 
 	// Find and return plugin
-	for (var plugin of this.plugins)
-		if (plugin.ID == id)
-			return plugin;
+	for (var i = 0 ; i < this.plugins.length ; i++)
+		if (this.plugins[i].ID == id)
+			return this.plugins[i];
 
-}
+};
 
 module.exports.prototype.getPluginWithCapability = function(capability) {
 
 	// Find and return plugin
-	for (var plugin of this.plugins)
-		if (plugin.capabilities && plugin.capabilities.includes(capability))
-			return plugin;
+	for (var i = 0 ; i < this.plugins.length ; i++)
+		if (this.plugins[i].capabilities && this.plugins[i].capabilities.includes(capability))
+			return this.plugins[i];
 
-}
+};
 
 module.exports.prototype.removePlugin = function(id) {
 
@@ -217,33 +221,33 @@ module.exports.prototype.removePlugin = function(id) {
 
 	}
 
-}
+};
 
 module.exports.prototype.triggerEvent = function(name, value) {
 
 	// Forward events to all plugins
 	console.log("SAL: Event " + name + " triggered : " + value);
-	for (var plugin of this.plugins)
-		if (plugin._isLoaded && plugin.onEvent)
-			plugin.onEvent(name, value);
+	for (var i = 0 ; i < this.plugins.length ; i++)
+		if (this.plugins[i]._isLoaded && this.plugins[i].onEvent)
+			this.plugins[i].onEvent(name, value);
 
 	// Forward event to host listeners
-	for (var listener of this.eventListeners)
-		if (listener.event == name)
-			listener.callback(value, name);
+	for (var x = 0 ; i < this.eventListeners.length ; x++)
+		if (this.eventListeners[x].event == name)
+			this.eventListeners[x].callback(value, name);
 
-}
+};
 
 module.exports.prototype._outputText = function(text) {
 
 	// Notify
 	this.triggerEvent("core.speech.output", text);
 
-}
+};
 
 module.exports.prototype.addEventListener = function(event, callback) {
 	this.eventListeners.push({ event: event, callback: callback });
-}
+};
 
 module.exports.prototype.removeEventListener = function(event, callback) {
 	for (var i = 0 ; i < this.eventListeners.length ; i++) {
@@ -251,4 +255,37 @@ module.exports.prototype.removeEventListener = function(event, callback) {
 			this.eventListeners.splice(i--, 1);
 		}
 	}
+};
+
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(searchElement /*, fromIndex*/) {
+    'use strict';
+    if (this == null) {
+      throw new TypeError('Array.prototype.includes called on null or undefined');
+    }
+
+    var O = Object(this);
+    var len = parseInt(O.length, 10) || 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = parseInt(arguments[1], 10) || 0;
+    var k;
+    if (n >= 0) {
+      k = n;
+    } else {
+      k = len + n;
+      if (k < 0) {k = 0;}
+    }
+    var currentElement;
+    while (k < len) {
+      currentElement = O[k];
+      if (searchElement === currentElement ||
+         (searchElement !== searchElement && currentElement !== currentElement)) { // NaN !== NaN
+        return true;
+      }
+      k++;
+    }
+    return false;
+  };
 }

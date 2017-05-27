@@ -1,14 +1,16 @@
 //
 // Request - Sends an API request
 
+var Promise = require('promise');
+
 var SERVER_ADDRESS = "https://x41em8mtq8.execute-api.us-east-1.amazonaws.com/prod";
 
-module.exports = {
+var Request = {
 
 	get: function(endpoint) {
 
 		// Send request
-		return Request.sendRaw("GET", SERVER_ADDRESS + endpoint, null).then(xhr => {
+		return Request.sendRaw("GET", SERVER_ADDRESS + endpoint, null).then(function(xhr) {
 
 			// Convert to JSON
 			try {
@@ -32,7 +34,7 @@ module.exports = {
 	download: function(url) {
 
 		// Send request
-		return Request.sendRaw("GET", url, null).then(xhr => {
+		return Request.sendRaw("GET", url, null).then(function(xhr) {
 
 			// Done
 			return xhr.responseText;
@@ -43,7 +45,7 @@ module.exports = {
 
 	sendRaw: function(method, url, payload) {
 
-		return new Promise((onSuccess, onFail) => {
+		return new Promise(function (onSuccess, onFail) {
 
 			// Send request
 			var xhr = new XMLHttpRequest();
@@ -55,7 +57,7 @@ module.exports = {
 
 				onSuccess(xhr);
 
-			}
+			};
 
 			// On fail
 			xhr.onerror = function() {
@@ -65,10 +67,12 @@ module.exports = {
 					errorText: "HTTP error " + xhr.status
 				});
 
-			}
+			};
 
 		});
 
 	}
 
-}
+};
+
+module.exports = Request;

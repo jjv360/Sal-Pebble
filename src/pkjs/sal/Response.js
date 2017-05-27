@@ -11,4 +11,4 @@ module.exports = function Response() {
 		console.log("SAL: Response execute block not set!");
 	};
 
-}
+};

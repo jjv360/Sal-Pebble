@@ -1,6 +1,8 @@
 //
 // Native Location - Provides access to the device's GPS for looking up location
 
+var Promise = require('promise');
+
 module.exports = function NativeLocation() {
 
 	this.ID = "com.jjv360.native-location-html5";
@@ -11,28 +13,28 @@ module.exports = function NativeLocation() {
 	this.dependencies = [];
 	this.services = ["service.location"];
 
-}
+};
 
 module.exports.prototype.serviceConnected = function() {
 	return !!("geolocation" in navigator);
-}
+};
 
 module.exports.prototype.serviceBestAccuracy = function() {
 	return 5;
-}
+};
 
 module.exports.prototype.serviceGetCoordinates = function(accuracy) {
-	return new Promise((onSuccess, onFail) => {
+	return new Promise(function (onSuccess, onFail) {
 
 		// Get options
 		var opts = {
 			enableHighAccuracy: accuracy > 5,
 			timeout: accuracy > 5 ? 15000 : 5000,
 			maximumAge: accuracy > 5 ? 5 * 60 * 1000 : 0
-		}
+		};
 
 		// Send Request
-		navigator.geolocation.getCurrentPosition(data => {
+		navigator.geolocation.getCurrentPosition(function(data) {
 
 			// Success
 			onSuccess({
@@ -45,7 +47,7 @@ module.exports.prototype.serviceGetCoordinates = function(accuracy) {
 				speed: data.coords.speed
 			});
 
-		}, err => {
+		}, function(err) {
 
 			// Failed
 			var text = "Unable to get GPS location.";
@@ -56,5 +58,6 @@ module.exports.prototype.serviceGetCoordinates = function(accuracy) {
 
 		}, opts);
 
-	})
-}
+	});
+	
+};

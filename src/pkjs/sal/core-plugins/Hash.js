@@ -13,8 +13,8 @@ module.exports = function Hash() {
 	this.author = "jjv360";
 	this.dependencies = [];
 
-}
+};
 
 module.exports.prototype.sha256 = function(input) {
 	return SHA256(input);
-}
+};

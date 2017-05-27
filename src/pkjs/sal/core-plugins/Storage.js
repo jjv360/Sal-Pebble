@@ -14,7 +14,7 @@ module.exports = function Storage(sal) {
 	// Store Sal instance
 	this.sal = sal;
 
-}
+};
 
 /** Get a value from storage */
 module.exports.prototype.get = function(scope, key) {
@@ -23,9 +23,9 @@ module.exports.prototype.get = function(scope, key) {
 	} catch (e) {
 		return null;
 	}
-}
+};
 
 /** Put a value into storage */
 module.exports.prototype.set = function(scope, key, value) {
 	localStorage[scope + "_" + key] = JSON.stringify(value);
-}
+};

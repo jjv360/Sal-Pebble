@@ -2,14 +2,11 @@
 // App's main Javascript file
 
 // Includes
-// var Sal = require("./sal");
-//
-// // Vars
-// var sal = new Sal("com.jjv360.PebbleSal");
+var Sal = require("./sal");
 
-var Babel = require("babel-standalone");
-var code = Babel.transform("class T { h() { console.log('h'); } }; var t = new T(); t.h(); ", { presets: ['es2015'] }).code;
-eval(code);
+// Vars
+var sal = new Sal("com.jjv360.PebbleSal");
+
 
 
 

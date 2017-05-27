@@ -16,7 +16,7 @@ module.exports = function SalUIPlugin(sal) {
 	// Set properties
 	this.sal = sal;
 
-}
+};
 
 module.exports.prototype.load = function() {
 
@@ -74,18 +74,18 @@ module.exports.prototype.load = function() {
 	//
 	// }
 
-}
+};
 
 module.exports.prototype.unload = function() {
 
 	// Remove listener
 	// window.removeEventListener("resize", this.boundLayout);
 
-}
+};
 
 module.exports.prototype.clear = function() {
 
-}
+};
 
 module.exports.prototype.alert = function(title, text) {
 
@@ -103,7 +103,7 @@ module.exports.prototype.alert = function(title, text) {
 	// // Done
 	// return window;
 
-}
+};
 
 // /** @private Layout active windows */
 // layout() {
@@ -126,7 +126,7 @@ module.exports.prototype.openURL = function(url) {
 	// Open URL
 	// window.location.href = url;
 
-}
+};
 
 // /** Show content */
 module.exports.prototype.show = function(info) {
@@ -134,7 +134,7 @@ module.exports.prototype.show = function(info) {
 	// Notify main window
 	this.sal.triggerEvent("native.ui.content.show", info);
 
-}
+};
 
 /** Play UI sound */
 module.exports.prototype.playSound = function(name) {
@@ -148,4 +148,4 @@ module.exports.prototype.playSound = function(name) {
 	// sound.currentTime = 0;
 	// sound.play();
 
-}
+};

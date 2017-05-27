@@ -1,43 +1,44 @@
 {
-  "author": "jjv360",
-  "dependencies": {
-    "babel-standalone": "^6.24.2",
-    "crypto-js": "^3.1.9-1",
-    "localforage": "^1.5.0"
-  },
-  "keywords": [],
-  "name": "sal",
-  "pebble": {
-    "capabilities": [
-      "configurable"
-    ],
-    "displayName": "Sal",
-    "enableMultiJS": true,
-    "messageKeys": [
-      "action",
-      "text"
-    ],
-    "projectType": "native",
-    "resources": {
-      "media": [
-        {
-          "file": "images/Menu Icon",
-          "menuIcon": true,
-          "name": "IMAGE_MENU_ICON",
-          "targetPlatforms": null,
-          "type": "bitmap"
-        }
-      ]
+    "author": "jjv360",
+    "dependencies": {
+        "babel-standalone": "^6.24.2",
+        "crypto-js": "^3.1.9-1",
+        "localforage": "^1.5.0",
+        "promise": "^7.1.1"
     },
-    "sdkVersion": "3",
-    "targetPlatforms": [
-      "basalt",
-      "chalk"
-    ],
-    "uuid": "09cc0007-fdeb-496d-a898-9cf3cde051a8",
-    "watchapp": {
-      "watchface": false
-    }
-  },
-  "version": "2.0.0"
+    "keywords": [],
+    "name": "sal",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "Sal",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "action",
+            "text"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/Menu Icon",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_ICON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "09cc0007-fdeb-496d-a898-9cf3cde051a8",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "2.0.0"
 }

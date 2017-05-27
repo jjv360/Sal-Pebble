@@ -1,4 +1,6 @@
 
+var Promise = require('promise');
+
 module.exports = function HTTP(sal) {
 
 	// Properties
@@ -9,16 +11,18 @@ module.exports = function HTTP(sal) {
 	this.author = "jjv360";
 	this.dependencies = [];
 	this.sal = sal;
+	
+};
 
 /** Sends a GET HTTP request. @returns Promise */
 module.exports.prototype.get = function(url, customHeaders) {
 	return this.send("GET", url, null, customHeaders);
-}
+};
 
 /** Sends a POST HTTP request. @returns Promise */
 module.exports.prototype.post = function(url, body, customHeaders) {
 	return this.send("POST", url, body, customHeaders);
-}
+};
 
 /** Sends an HTTP request @returns Promise */
 module.exports.prototype.send = function(method, url, body, customHeaders) {
@@ -31,7 +35,7 @@ module.exports.prototype.send = function(method, url, body, customHeaders) {
 		body = JSON.stringify(body);
 
 	// Return promise
-	return new Promise((onSuccess, onFail) => {
+	return new Promise(function(onSuccess, onFail) {
 
 		// Create XHR
 		var xhr = new XMLHttpRequest();
@@ -47,15 +51,15 @@ module.exports.prototype.send = function(method, url, body, customHeaders) {
 		xhr.send(body);
 
 		// Add load handler
-		xhr.onload = () => {
+		xhr.onload = function() {
 			onSuccess(xhr.responseText);
-		}
+		};
 
 		// Add error handler
-		xhr.onerror = (err) => {
+		xhr.onerror = function(err) {
 			onFail("Error " + xhr.status);
-		}
+		};
 
-	});
+	}.bind(this));
 
-}
+};

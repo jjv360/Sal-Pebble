@@ -13,7 +13,7 @@ module.exports = function CronPlugin() {
 	this.dependencies = [];
 	this.canRunInBackground = false;
 
-}
+};
 
 /** Schedules a recurring task to execute, or updates an existing one if the taskID already exists. */
 module.exports.prototype.schedule = function(taskID, pluginID, functionName, interval, repeatCount, customData) {
@@ -28,4 +28,4 @@ module.exports.prototype.schedule = function(taskID, pluginID, functionName, int
 		lastRun: Date.now()
 	};
 
-}
+};
