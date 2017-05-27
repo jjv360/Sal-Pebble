@@ -1,9 +1,7 @@
 //
 // Storage - Provides client-side local storage of data
 
-import * as firebase from 'firebase';
-
-export default class Storage {
+module.exports = class Storage {
 
 	get ID() {
 		return "core.storage";

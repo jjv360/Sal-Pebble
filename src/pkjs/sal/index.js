@@ -1,6 +1,4 @@
 //
 // Exports
 
-import Sal from './Sal.js';
-
-export default Sal;
+module.exports = require('./Sal.js');

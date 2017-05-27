@@ -3,7 +3,7 @@
 
 var SHA256 = require("crypto-js/sha256");
 
-export default class Hash {
+module.exports = class Hash {
 
 	get ID() {
 		return "core.security.hash";

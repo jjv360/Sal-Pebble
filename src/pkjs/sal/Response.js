@@ -1,7 +1,7 @@
 //
 // Response - A possible response to user input
 
-export default class Response {
+module.exports = class Response {
 
 	constructor() {
 

@@ -1,5 +1,5 @@
 
-export default class HTTP {
+module.exports = class HTTP {
 
 	get ID() {
 		return "core.network.http";

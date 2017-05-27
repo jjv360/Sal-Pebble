@@ -1,7 +1,7 @@
 //
 // Main class for the Sal UI plugin
 
-export default class SalUIPlugin {
+module.exports = class SalUIPlugin {
 
 	get ID() {
 		return "core.ui";

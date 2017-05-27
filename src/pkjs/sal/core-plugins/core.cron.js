@@ -1,7 +1,7 @@
 //
 // Hash - Provides access to hashing functions
 
-export default class CronPlugin {
+module.exports = class CronPlugin {
 
 	constructor() {
 

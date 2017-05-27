@@ -1,13 +1,13 @@
 //
 // Sal - Main class
 
-import Request from './Request';
-import UIPlugin from './core-plugins/UI';
-import HashPlugin from './core-plugins/Hash';
-import HTTPPlugin from './core-plugins/HTTP';
-import localforage from 'localforage';
+var Request = require('./Request');
+var UIPlugin = require('./core-plugins/UI');
+var HashPlugin = require('./core-plugins/Hash');
+var HTTPPlugin = require('./core-plugins/HTTP');
+var localforage = require('localforage');
 
-export default class Sal {
+module.exports = class Sal {
 
 	constructor(appID) {
 
@@ -36,10 +36,6 @@ export default class Sal {
 		require(["./core-plugins/Hash"], pluginLoad);
 		require(["./core-plugins/HTTP"], pluginLoad);
 		require(["./core-plugins/Storage"], pluginLoad);
-		// require(["./core-plugins/core.notifications.local"], pluginLoad);
-		// require(["./core-plugins/core.speech.output"], pluginLoad);
-		// require(["./core-plugins/core.speech.input"], pluginLoad);
-		// require(["./core-plugins/core.storage.index"], pluginLoad);
 		require(["./core-plugins/core.cron"], pluginLoad);
 		require(["./core-plugins/com.jjv360.native-location-html5"], pluginLoad);
 

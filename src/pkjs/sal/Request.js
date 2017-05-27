@@ -3,7 +3,7 @@
 
 var SERVER_ADDRESS = "https://x41em8mtq8.execute-api.us-east-1.amazonaws.com/prod";
 
-export default class Request {
+module.exports = class Request {
 
 	static get(endpoint) {
 

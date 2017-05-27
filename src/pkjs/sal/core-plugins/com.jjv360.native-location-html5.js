@@ -1,7 +1,7 @@
 //
 // Native Location - Provides access to the device's GPS for looking up location
 
-export default class NativeLocation {
+module.exports = class NativeLocation {
 
 	get ID() {
 		return "com.jjv360.native-location-html5";
