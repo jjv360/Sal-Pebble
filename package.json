@@ -9,10 +9,10 @@
         ],
         "displayName": "Sal",
         "enableMultiJS": true,
-        "messageKeys": {
-            "action": 0,
-            "text": 1
-        },
+        "messageKeys": [
+            "action",
+            "text"
+        ],
         "projectType": "native",
         "resources": {
             "media": [
@@ -35,5 +35,5 @@
             "watchface": false
         }
     },
-    "version": "1.5.0"
+    "version": "2.0.0"
 }
