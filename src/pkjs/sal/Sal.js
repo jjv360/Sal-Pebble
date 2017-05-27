@@ -5,7 +5,6 @@ var Request = require('./Request');
 var localforage = require('localforage');
 var Babel = require("babel-standalone");
 
-
 module.exports = function Sal(appID) {
 
 	// Set properties
@@ -13,11 +12,15 @@ module.exports = function Sal(appID) {
 	this.plugins = [];
 	this.eventListeners = [];
 
-	// Create localforage instance for plugin storage
-	this.pluginDataCache = localforage.createInstance({ name: "sal-plugin-cache" });
-
 	// Events
 	this.onoutput = null;
+	
+};
+
+module.exports.prototype.init = function() {
+
+	// Create localforage instance for plugin storage
+	this.pluginDataCache = localforage.createInstance({ name: "sal-plugin-cache" });
 
 	// Load plugins
 	this.loadLocalPlugins();
@@ -50,9 +53,10 @@ module.exports.prototype.loadLocalPlugins = function() {
 module.exports.prototype.loadRemotePlugins = function() {
 
 	console.debug("SAL: Fetching plugin list");
-	Request.get("/plugins/list").then(function (items) {
+	Request.get("/plugins/list").then(function(items) {
 
 		// Load plugins
+		console.log("SAL: Loading " + items.length + " plugins");
 		for (var i = 0 ; i < items.length ; i++)
 			this.loadRemotePlugin(items[i]);
 
@@ -67,6 +71,7 @@ module.exports.prototype.loadRemotePlugins = function() {
 module.exports.prototype.loadRemotePlugin = function(info) {
 
 	// Stop if not valid
+	console.debug("Attempting to load plugin " + JSON.stringify(info));
 	if (!info.valid)
 		return;
 

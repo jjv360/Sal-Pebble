@@ -1,6 +1,11 @@
 //
 // App's main Javascript file
 
+// Polyfill missing JS features
+window.global = window;
+require("babel-polyfill");
+window.Promise = require('es6-promise').Promise;
+
 // Includes
 var Sal = require("./sal");
 
@@ -11,6 +16,9 @@ var sal = new Sal("com.jjv360.PebbleSal");
 
 /** Called when the app is launched on the watch */
 Pebble.addEventListener("ready", function(e) {
+	
+	// Setup Sal
+	sal.init();
 
 	// Get timeline token
 	Pebble.getTimelineToken(function (token) {
@@ -38,7 +46,6 @@ Pebble.addEventListener("appmessage", function(e) {
 	if (e.payload.action == "process-text") {
 	
 		// Pass user's input to Sal
-		console.log("User input: " + e.payload.text);
 		sal.triggerEvent("core.input.text", e.payload.text);
 	
 	}

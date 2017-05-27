@@ -1,6 +1,4 @@
 
-var Promise = require('promise');
-
 module.exports = function HTTP(sal) {
 
 	// Properties
@@ -50,14 +48,19 @@ module.exports.prototype.send = function(method, url, body, customHeaders) {
 		// Send request
 		xhr.send(body);
 
-		// Add load handler
-		xhr.onload = function() {
-			onSuccess(xhr.responseText);
-		};
+		// On complete
+		xhr.onreadystatechange = function () {
 
-		// Add error handler
-		xhr.onerror = function(err) {
-			onFail("Error " + xhr.status);
+			// Wait until done
+			if (xhr.readyState != 4)
+				return;
+
+			// Check if success
+			if (xhr.status >= 200 && xhr.status <= 399)
+				onSuccess(xhr.responseText);
+			else
+				onFail("HTTP error " + xhr.status);
+
 		};
 
 	}.bind(this));

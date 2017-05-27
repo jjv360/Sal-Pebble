@@ -1,8 +1,6 @@
 //
 // Request - Sends an API request
 
-var Promise = require('promise');
-
 var SERVER_ADDRESS = "https://x41em8mtq8.execute-api.us-east-1.amazonaws.com/prod";
 
 var Request = {
@@ -14,6 +12,7 @@ var Request = {
 
 			// Convert to JSON
 			try {
+				console.log("SAL: Converting response from JSON");
 				var json = JSON.parse(xhr.responseText);
 
 				// Get error
@@ -52,20 +51,19 @@ var Request = {
 			xhr.open(method, url);
 			xhr.send(payload);
 
-			// On success
-			xhr.onload = function() {
+			// On complete
+			xhr.onreadystatechange = function () {
 
-				onSuccess(xhr);
-
-			};
-
-			// On fail
-			xhr.onerror = function() {
-
-				onFail({
-					errorCode: xhr.statusCode,
-					errorText: "HTTP error " + xhr.status
-				});
+				// Wait until done
+				if (xhr.readyState != 4)
+					return;
+				
+				// Check if success
+				console.log("XHR done: " + xhr.responseText);
+				if (xhr.status >= 200 && xhr.status <= 399)
+					onSuccess(xhr);
+				else
+					onFail({ errorCode: xhr.statusCode, errorText: "HTTP error " + xhr.status });
 
 			};
 

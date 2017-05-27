@@ -1,10 +1,11 @@
 {
     "author": "jjv360",
     "dependencies": {
+        "babel-polyfill": "^7.0.0-alpha.9",
         "babel-standalone": "^6.24.2",
         "crypto-js": "^3.1.9-1",
-        "localforage": "^1.5.0",
-        "promise": "^7.1.1"
+        "es6-promise": "^4.1.0",
+        "localforage": "^1.5.0"
     },
     "keywords": [],
     "name": "sal",

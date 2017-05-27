@@ -1,8 +1,6 @@
 //
 // Native Location - Provides access to the device's GPS for looking up location
 
-var Promise = require('promise');
-
 module.exports = function NativeLocation() {
 
 	this.ID = "com.jjv360.native-location-html5";
