@@ -7,8 +7,8 @@
 // // Vars
 // var sal = new Sal("com.jjv360.PebbleSal");
 
-var Babel = require("babel-core");
-var code = Babel.transform("class T { h() { console.log('h'); } }; var t = new T(); t.h(); ").code;
+var Babel = require("babel-standalone");
+var code = Babel.transform("class T { h() { console.log('h'); } }; var t = new T(); t.h(); ", { presets: ['es2015'] }).code;
 eval(code);
 
 
