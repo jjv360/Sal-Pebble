@@ -5,8 +5,6 @@
 
 #define MIN(a, b)		(a < b ? a : b)
 #define MAX(a, b)		(a > b ? a : b)
-#define DICT_ACTION		0
-#define DICT_TEXT		1
 
 static Window* window = 0;
 static OutputTextLabel* outputLabel = 0;
@@ -90,7 +88,7 @@ static void onAppMessageOutboxFailed(DictionaryIterator *iterator, AppMessageRes
 static void onAppMessageReceived(DictionaryIterator* iterator, void *context) {
 	
 	// Get action
-	Tuple* action = dict_find(iterator, DICT_ACTION);
+	Tuple* action = dict_find(iterator, MESSAGE_KEY_action);
 	if (!action)
 		return;
 	
@@ -98,7 +96,7 @@ static void onAppMessageReceived(DictionaryIterator* iterator, void *context) {
 	if (strcmp(action->value->cstring, "output-text") == 0) {
 		
 		// Get text
-		Tuple* text = dict_find(iterator, DICT_TEXT);
+		Tuple* text = dict_find(iterator, MESSAGE_KEY_text);
 		if (!text)
 			return;
 		
@@ -291,8 +289,8 @@ void MainWindow_ProcessText(const char* text) {
 		return MainWindow_SetOutputText("Sorry, there was a problem connecting to your phone...");
 	
 	// Create dictionary
-	dict_write_cstring(dict, DICT_ACTION, "process-text");
-	dict_write_cstring(dict, DICT_TEXT, text);
+	dict_write_cstring(dict, MESSAGE_KEY_action, "process-text");
+	dict_write_cstring(dict, MESSAGE_KEY_text, text);
 	
 	// Send to dictionary to the phone app
 	res = app_message_outbox_send();
