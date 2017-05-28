@@ -3,9 +3,9 @@
     "dependencies": {
         "babel-polyfill": "^7.0.0-alpha.9",
         "babel-standalone": "^6.24.2",
+        "base-64": "^0.1.0",
         "crypto-js": "^3.1.9-1",
-        "es6-promise": "^4.1.0",
-        "localforage": "^1.5.0"
+        "es6-promise": "^4.1.0"
     },
     "keywords": [],
     "name": "sal",
@@ -34,7 +34,9 @@
         "sdkVersion": "3",
         "targetPlatforms": [
             "basalt",
-            "chalk"
+            "chalk",
+            "diorite",
+            "emery"
         ],
         "uuid": "09cc0007-fdeb-496d-a898-9cf3cde051a8",
         "watchapp": {

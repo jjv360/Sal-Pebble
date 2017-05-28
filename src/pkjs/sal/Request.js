@@ -59,7 +59,6 @@ var Request = {
 					return;
 				
 				// Check if success
-				console.log("XHR done: " + xhr.responseText);
 				if (xhr.status >= 200 && xhr.status <= 399)
 					onSuccess(xhr);
 				else

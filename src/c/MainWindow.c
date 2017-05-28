@@ -9,6 +9,8 @@
 static Window* window = 0;
 static OutputTextLabel* outputLabel = 0;
 static SalIcon* salIcon = 0;
+static TextLayer* statusLbl = 0;
+static char statusLblBfr[256] = {0};
 
 static void onWindowLoad(Window* window) {
 	
@@ -34,6 +36,16 @@ static void onWindowLoad(Window* window) {
 	// Create Sal icon
 	salIcon = SalIcon_Create(bounds);
 	layer_add_child(window_layer, SalIcon_GetLayer(salIcon));
+	
+	// Create status label
+	statusLbl = text_layer_create(GRect(0, bounds.size.h - 18, bounds.size.w, 18));
+	text_layer_set_background_color(statusLbl, GColorClear);
+	text_layer_set_overflow_mode(statusLbl, GTextOverflowModeFill);
+	text_layer_set_font(statusLbl, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	text_layer_set_text_alignment(statusLbl, GTextAlignmentCenter);
+	text_layer_set_text_color(statusLbl, GColorLightGray);
+	text_layer_set_text(statusLbl, "");
+	layer_add_child(window_layer, text_layer_get_layer(statusLbl));
 	
 }
 
@@ -109,6 +121,16 @@ static void onAppMessageReceived(DictionaryIterator* iterator, void *context) {
 		// Turn on screen light momentarily
 		light_enable_interaction();
 		
+	} else if (strcmp(action->value->cstring, "status") == 0) {
+		
+		// Get text
+		Tuple* text = dict_find(iterator, MESSAGE_KEY_text);
+		if (!text)
+			return;
+		
+		// Display status
+		MainWindow_UpdateStatus(text->value->cstring);
+		
 	}
 	
 }
@@ -141,6 +163,9 @@ void MainWindow_Show() {
 	app_message_register_outbox_failed(onAppMessageOutboxFailed);
 	app_message_register_inbox_received(onAppMessageReceived);
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+	
+	// Set icon fullscreen
+	MainWindow_SetIconFullscreen();
 	
 }
 
@@ -268,16 +293,23 @@ void MainWindow_DictationCallback(DictationSession* session, DictationSessionSta
 	
 }*/
 
-void MainWindow_ProcessText(const char* text) {
+void MainWindow_SetIconFullscreen() {
 	
 	// Get information about the Window
 	Layer* window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-		
-	// Show activity, move icon view to fill the screen
+	
+	// Clear text and resize
 	OutputTextLabel_SetText(outputLabel, "");
 	layer_set_frame(SalIcon_GetLayer(salIcon), GRect(0, 30, bounds.size.w, bounds.size.h - 60));
 	isHidingText = true;
+	
+}
+
+void MainWindow_ProcessText(const char* text) {
+		
+	// Show activity, move icon view to fill the screen
+	MainWindow_SetIconFullscreen();
 		
 	// Start animating Sal icon
 	SalIcon_SetAnimated(salIcon, true);
@@ -299,5 +331,29 @@ void MainWindow_ProcessText(const char* text) {
 	
 	// Continually send a ping to the phone until data is received
 	//MainWindow_SendPing(0);
+	
+}
+
+
+// ============================================================ Status label
+
+static AppTimer* statusClearTimer = 0;
+
+void MainWindow_ClearStatus(void* data) {
+	text_layer_set_text(statusLbl, "");
+	statusClearTimer = 0;
+}
+
+void MainWindow_UpdateStatus(const char* text) {
+	
+	// Copy text into buffer
+	strncpy(statusLblBfr, text, 256 - 1);
+	
+	// Set text
+	text_layer_set_text(statusLbl, statusLblBfr);
+	
+	// Register timer to do this again soon
+	if (statusClearTimer) app_timer_cancel(statusClearTimer);
+	statusClearTimer = app_timer_register(7 * 1000, MainWindow_ClearStatus, 0);
 	
 }

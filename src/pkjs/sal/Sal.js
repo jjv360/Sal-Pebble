@@ -2,7 +2,6 @@
 // Sal - Main class
 
 var Request = require('./Request');
-var localforage = require('localforage');
 var Babel = require("babel-standalone");
 
 module.exports = function Sal(appID) {
@@ -11,6 +10,7 @@ module.exports = function Sal(appID) {
 	this.appID = appID;
 	this.plugins = [];
 	this.eventListeners = [];
+	this.cachedPluginCode = {};
 
 	// Events
 	this.onoutput = null;
@@ -18,9 +18,6 @@ module.exports = function Sal(appID) {
 };
 
 module.exports.prototype.init = function() {
-
-	// Create localforage instance for plugin storage
-	this.pluginDataCache = localforage.createInstance({ name: "sal-plugin-cache" });
 
 	// Load plugins
 	this.loadLocalPlugins();
@@ -41,14 +38,21 @@ module.exports.prototype.loadLocalPlugins = function() {
 	pluginLoad(require("./core-plugins/core.speech.input"));
 	pluginLoad(require("./core-plugins/core.speech.output"));
 	pluginLoad(require("./core-plugins/com.jjv360.native-location-html5"));
+	
+	// Load code cache
+	try {
+		this.cachedPluginCode = JSON.parse(localStorage.plugincache) || {};
+	} catch (e) {}
 
 	// Load plugins from cache
-	this.pluginDataCache.iterate(function (value, key) {
+	for (var key in this.cachedPluginCode) {
 
 		// Run plugin
-		this.runPlugin(value);
+		var plugin = this.runPlugin(this.cachedPluginCode[key]);
+		if (plugin)
+			console.log("SAL: Loaded locally cached plugin " + plugin.ID + " version " + plugin.version);
 
-	}.bind(this));
+	}
 
 };
 
@@ -58,6 +62,7 @@ module.exports.prototype.loadRemotePlugins = function() {
 	Request.get("/plugins/list").then(function(items) {
 
 		// Load plugins
+		this.triggerEvent("core.plugins.download-started", items.length);
 		for (var i = 0 ; i < items.length ; i++)
 			this.loadRemotePlugin(items[i]);
 
@@ -77,20 +82,32 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 
 	// Stop if we have it already
 	for (var i = 0 ; i < this.plugins.length ; i++)
-		if (this.plugins[i].ID == info.id && this.plugins[i].version == info.version)
+		if (this.plugins[i].ID == info.id && this.plugins[i].version >= info.version)
 			return;
 
 	// Download it
 	console.debug("SAL: Downloading plugin " + info.id + " version " + info.version);
 	Request.download(info.url).then(function(js) {
 
+		// ES5ify the code, since we're running on an ancient JavaScript system here :/
+		js = Babel.transform(js, { presets: ['es2015'] }).code;
+
 		// Execute plugin
 		var plugin = this.runPlugin(js);
+		if (!plugin)
+			return console.warn("Plugin failed to execute! " + JSON.stringify(info));
 
 		// Everything went well, store plugin code for offline access
-		this.pluginDataCache.setItem(plugin.ID, js).then(function() {
+		try {
+			this.cachedPluginCode[plugin.ID] = js;
+			localStorage.plugincache = JSON.stringify(this.cachedPluginCode);
 			console.debug("SAL: Stored plugin data for " + plugin.ID);
-		});
+		} catch(e) {
+			console.log("SAL: Unable to store plugin code for " + plugin.ID);	
+		}
+		
+		// Notify
+		this.triggerEvent("core.plugin.installed", plugin || {});
 
 	}.bind(this)).catch(function(err) {
 
@@ -103,21 +120,27 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 };
 
 module.exports.prototype.runPlugin = function(code) {
+	
+	try {
 
-	// ES5ify the code, since we're running on an ancient JavaScript system here :/
-	code = Babel.transform(code, { presets: ['es2015'] }).code;
+		// Execute code
+		var module = {};
+		module.exports = {};
+		eval(code);
 
-	// Execute code
-	var module = {};
-	module.exports = {};
-	eval(code);
+		// Create plugin instance
+		var newPlugin = new module.exports(this);
 
-	// Create plugin instance
-	var newPlugin = new module.exports(this);
-
-	// Add new plugin
-	this.addPlugin(newPlugin);
-	return newPlugin;
+		// Add new plugin
+		this.addPlugin(newPlugin);
+		return newPlugin;
+		
+	} catch (e) {
+		
+		// Unable to run plugin!
+		console.warn("SAL: Unable to execute plugin: " + e.message);
+		
+	}
 
 };
 
@@ -167,6 +190,7 @@ module.exports.prototype.checkPluginDependencies = function(plugin) {
 	plugin._isLoaded = true;
 	plugin._waitingForDependencies = false;
 	console.debug("SAL: Loaded plugin " + plugin.ID);
+	this.triggerEvent("core.plugin.loaded", plugin);
 
 	// Send resume message
 	if (plugin.resume) plugin.resume(this);
@@ -237,7 +261,7 @@ module.exports.prototype.triggerEvent = function(name, value) {
 			this.plugins[i].onEvent(name, value);
 
 	// Forward event to host listeners
-	for (var x = 0 ; i < this.eventListeners.length ; x++)
+	for (var x = 0 ; x < this.eventListeners.length ; x++)
 		if (this.eventListeners[x].event == name)
 			this.eventListeners[x].callback(value, name);
 

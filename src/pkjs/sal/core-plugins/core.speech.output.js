@@ -1,7 +1,7 @@
 //
 // Speech Output - Handles outputting text-to-speech to the user
 
-module.exports = function SpeechInput() {
+module.exports = function SpeechInput(sal) {
 
 	// Properties
 	this.jobs = {};
@@ -11,6 +11,7 @@ module.exports = function SpeechInput() {
 	this.version = 1;
 	this.author = "jjv360";
 	this.dependencies = [];
+	this.sal = sal;
 
 };
 
@@ -19,4 +20,4 @@ module.exports.prototype.say = function(text) {
 	// Send event
 	this.sal.triggerEvent("core.speech.output", text);
 
-}
+};
