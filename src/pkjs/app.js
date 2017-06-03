@@ -16,7 +16,6 @@ console.error = console.error || console.log;
 var Sal = require("./sal");
 
 // Vars
-var config = localStorage.config && JSON.parse(localStorage.config) || {};
 var sal = new Sal("com.jjv360.PebbleSal");
 var waitingInput = null;
 
@@ -33,8 +32,8 @@ Pebble.addEventListener("ready", function(e) {
 
 		// Got token, store it
 		console.log("Got timeline token: " + token);
-		config.pebbleTimelineToken = token;
-		localStorage.config = JSON.stringify(config);
+// 		config.pebbleTimelineToken = token;
+// 		localStorage.config = JSON.stringify(config);
 
 	}, function (error) {
 
@@ -168,15 +167,6 @@ function isLoaded() {
 
 /** Called to send the watch app the ready event once the required Sal plugins have loaded */
 function checkLoaded() {
-	
-	// Update settings
-	var Storage = sal.getPlugin("core.storage");
-	if (Storage) {
-		
-		// Pass config info to Sal storage
-		Storage.set("com.jjv360.WolframAlpha", "appid", config.wolframAlphaAPIKey);
-		
-	}
 	
 	// Check if loaded
 	if (!isLoaded())
