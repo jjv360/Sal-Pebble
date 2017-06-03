@@ -67,15 +67,24 @@ Pebble.addEventListener("appmessage", function(e) {
 });
 
 
+/** Displays the text on the user's watch as Sal output */
+function showText(text) {
+	
+	// Send message to watch
+	Pebble.sendAppMessage({
+		action: "output-text",
+		text: text
+	});
+	
+}
+
+
 /** Called when Sal has some output to show to the user */
 sal.addEventListener("core.speech.output", function(text) {
 	
 	// Show text on watch, send an app message
 	console.log("Sal output: " + text);
-	Pebble.sendAppMessage({
-		action: "output-text",
-		text: text
-	});
+	showText(text);
 	
 });
 
@@ -98,41 +107,57 @@ sal.addEventListener("core.plugin.installed", function(plugin) {
 
 
 /** Called when Sal starts to download plugins */
-sal.addEventListener("core.plugins.download-started", function(count) {
+// sal.addEventListener("core.plugins.download-started", function(count) {
 	
-	// Notify
-	console.log("Sending status: Loading " + count + (count == 1 ? " plugin" : " plugins"));
-	Pebble.sendAppMessage({
-		action: "status",
-		text: "Loading " + count + (count == 1 ? " plugin" : " plugins")
-	});
+// 	// Notify
+// 	console.log("Sending status: Loading " + count + (count == 1 ? " plugin" : " plugins"));
+// 	Pebble.sendAppMessage({
+// 		action: "status",
+// 		text: "Loading " + count + (count == 1 ? " plugin" : " plugins")
+// 	});
 	
-});
+// });
 
 
 /** Called when the user wants to configure the app. */
+window.PebbleShowConfigContext = false;
 Pebble.addEventListener("showConfiguration", function(e) {
+// 	return Pebble.openURL("https://google.com");
+	
+	// Mark as in the config context
+	window.PebbleShowConfigContext = true;
+	setTimeout(function() {
+		window.PebbleShowConfigContext = false;
+	}, 0);
 
 	// Launch settings page
-	Pebble.openURL("https://sal-ai.appspot.com/apps/pebble-config/index.html#" + encodeURIComponent(JSON.stringify(config)));
+// 	Pebble.openURL("https://sal-ai.appspot.com/apps/pebble-config/index.html#" + encodeURIComponent(JSON.stringify(config)));
+	
+	// Find Settings plugin
+	var Settings = sal.getPlugin("core.settings");
+	if (!Settings)
+		return showText("Sorry, I couldn't find the Settings plugin.");
+	
+	// Show settings
+	Settings.show();
 
 });
 
 
 /** Called when the user saves the config */
-Pebble.addEventListener("webviewclosed", function(e) {
+// Pebble.addEventListener("webviewclosed", function(e) {
 
-	// Check for data
-	var newConfig = e.response && JSON.parse(e.response);
-	if (!newConfig)
-		return;
+// 	// Check for data
+// 	var newConfig = e.response && JSON.parse(e.response);
+// 	if (!newConfig)
+// 		return;
 
-	// Save new config
-	config = newConfig;
-	localStorage.config = JSON.stringify(config);
-	checkLoaded();
+// 	// Save new config
+// 	config = newConfig;
+// 	localStorage.config = JSON.stringify(config);
+// 	checkLoaded();
 
-});
+// });
 
 
 /** Checksi f Sal is loaded yet */

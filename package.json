@@ -11,6 +11,7 @@
     "name": "sal",
     "pebble": {
         "capabilities": [
+            "location",
             "configurable"
         ],
         "displayName": "Sal",

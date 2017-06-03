@@ -1,6 +1,8 @@
 //
 // Main class for the Sal UI plugin
 
+var UIWindow = require("./UIWindow");
+
 module.exports = function SalUIPlugin(sal) {
 
 	// Properties
@@ -121,11 +123,23 @@ module.exports.prototype.alert = function(title, text) {
 //
 // }
 
+/** Open URL. NOTE: This will only work from within the context of Pebble's showConfiguration callback! */
 module.exports.prototype.openURL = function(url) {
-
-	// Open URL
-	// window.location.href = url;
-
+	
+	// Check if in the show config context
+	if (!window.PebbleShowConfigContext)
+		return;
+	
+	// Add our params to the URL
+	url += (url.indexOf("?") == -1 ? "?" : "&") + "s_eventMode=pebble";
+	
+	// Open it
+	console.log("Opening: " + url);
+	Pebble.openURL(url);
+	
+	// Return window instance
+	return new UIWindow();
+	
 };
 
 // /** Show content */
