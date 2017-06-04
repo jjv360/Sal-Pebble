@@ -11,6 +11,7 @@ static OutputTextLabel* outputLabel = 0;
 static SalIcon* salIcon = 0;
 static TextLayer* statusLbl = 0;
 static char statusLblBfr[256] = {0};
+static AppTimer* phoneWakeTimer = 0;
 
 static void onWindowLoad(Window* window) {
 	
@@ -59,12 +60,17 @@ static void onWindowUnload(Window* window) {
 	SalIcon_Destroy(salIcon);
 	salIcon = 0;
 	
+	// Remove phone wake timer
+	if (phoneWakeTimer)
+		app_timer_cancel(phoneWakeTimer);
+	
 }
 
 static void onButtonDown(ClickRecognizerRef recognizer, void *context) {
 	
 	// User pressed a button, start listening for input again
 	MainWindow_Listen();
+	MainWindow_SetAwake();
 	
 }
 
@@ -98,6 +104,9 @@ static void onAppMessageOutboxFailed(DictionaryIterator *iterator, AppMessageRes
 
 #define APPMSG_BUFFER_SIZE 4096
 static void onAppMessageReceived(DictionaryIterator* iterator, void *context) {
+	
+	// Keep phone app active
+	MainWindow_SetAwake();
 	
 	// Get action
 	Tuple* action = dict_find(iterator, MESSAGE_KEY_action);
@@ -219,6 +228,9 @@ static DictationSession* dictationSession = 0;
 static bool isListening = false;
 void MainWindow_Listen() {
 	
+	// Keep phone awake
+	MainWindow_SetAwake();
+	
 	// Ignore if already listening
 	if (isListening)
 		return;
@@ -246,6 +258,9 @@ void MainWindow_Listen() {
 }
 
 void MainWindow_DictationCallback(DictationSession* session, DictationSessionStatus status, char* transcription, void* context) {
+	
+	// Keep phone awake
+	MainWindow_SetAwake();
 	
 	// Finished listening
 	isListening = false;
@@ -329,8 +344,8 @@ void MainWindow_ProcessText(const char* text) {
 	if (res != APP_MSG_OK)
 		return MainWindow_SetOutputText("Sorry, there was a problem connecting to your phone...");
 	
-	// Continually send a ping to the phone until data is received
-	//MainWindow_SendPing(0);
+	// Keep the phone awake for a while
+	MainWindow_SetAwake();
 	
 }
 
@@ -355,5 +370,49 @@ void MainWindow_UpdateStatus(const char* text) {
 	// Register timer to do this again soon
 	if (statusClearTimer) app_timer_cancel(statusClearTimer);
 	statusClearTimer = app_timer_register(7 * 1000, MainWindow_ClearStatus, 0);
+	
+}
+
+
+
+// =================================================================== Phone Wake Timer
+
+time_t lastWakeRequest = 0;
+int wakeSecondsDuration = 30;
+
+void MainWindow_SetAwake() {
+	
+	// Set wake request time
+	lastWakeRequest = time(0);
+	
+	// Remove old phone wake timer
+	if (phoneWakeTimer)
+		app_timer_cancel(phoneWakeTimer);
+	
+	// Create new timer
+	phoneWakeTimer = app_timer_register(1000, MainWindow_WakePhoneTimerCallback, 0);
+	
+}
+
+void MainWindow_WakePhoneTimerCallback(void* data) {
+	
+	// Start timer again if in range
+	phoneWakeTimer = 0;
+	if (time(0) - lastWakeRequest < wakeSecondsDuration)
+		phoneWakeTimer = app_timer_register(1000, MainWindow_WakePhoneTimerCallback, 0);
+	
+	// Open the outbox
+	DictionaryIterator* dict = 0;
+	AppMessageResult res = app_message_outbox_begin(&dict);
+	if (res != APP_MSG_OK)
+		return APP_LOG(APP_LOG_LEVEL_WARNING, "Unable to open outbox in phone wake timer");
+	
+	// Create dictionary
+	dict_write_cstring(dict, MESSAGE_KEY_action, "wake");
+	
+	// Send the dictionary to the phone app
+	res = app_message_outbox_send();
+	if (res != APP_MSG_OK)
+		return APP_LOG(APP_LOG_LEVEL_WARNING, "Unable to send packet in phone wake timer");
 	
 }
