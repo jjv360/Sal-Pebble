@@ -31,14 +31,7 @@ module.exports.prototype.loadLocalPlugins = function() {
 	console.debug("SAL: Loading local plugins...");
 	var pluginLoad = function(Plugin) { Plugin = Plugin && Plugin.default || Plugin; this.addPlugin( new Plugin(this)); }.bind(this);
 	pluginLoad(require("./core-plugins/UI"));
-	pluginLoad(require("./core-plugins/Hash"));
-	pluginLoad(require("./core-plugins/HTTP"));
-	pluginLoad(require("./core-plugins/Storage"));
-	pluginLoad(require("./core-plugins/core.cron"));
-	pluginLoad(require("./core-plugins/core.speech.input"));
-	pluginLoad(require("./core-plugins/core.speech.output"));
-	pluginLoad(require("./core-plugins/com.jjv360.native-location-html5"));
-	
+
 	// Load code cache
 	try {
 		this.cachedPluginCode = JSON.parse(localStorage.plugincache) || {};
@@ -103,9 +96,9 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 			localStorage.plugincache = JSON.stringify(this.cachedPluginCode);
 			console.debug("SAL: Stored plugin data for " + plugin.ID);
 		} catch(e) {
-			console.log("SAL: Unable to store plugin code for " + plugin.ID);	
+			console.log("SAL: Unable to store plugin code for " + plugin.ID);
 		}
-		
+
 		// Notify
 		this.triggerEvent("core.plugin.installed", plugin || {});
 
@@ -120,7 +113,7 @@ module.exports.prototype.loadRemotePlugin = function(info) {
 };
 
 module.exports.prototype.runPlugin = function(code) {
-	
+
 	try {
 
 		// Execute code
@@ -134,12 +127,12 @@ module.exports.prototype.runPlugin = function(code) {
 		// Add new plugin
 		this.addPlugin(newPlugin);
 		return newPlugin;
-		
+
 	} catch (e) {
-		
+
 		// Unable to run plugin!
 		console.warn("SAL: Unable to execute plugin: " + e.message);
-		
+
 	}
 
 };
@@ -149,6 +142,15 @@ module.exports.prototype.addPlugin = function(plugin) {
 	// Set state
 	plugin._isLoaded = false;
 	plugin._waitingForDependencies = true;
+
+	// Check if there's an existing plugin with a higher priority
+	for (var i = 0 ; i < this.plugins.length ; i++) {
+		var pl = this.plugins[i];
+		if (plugin.ID == pl.ID && (plugin.priority || 0) > (pl.priority || 0)) {
+			console.log("Plugin with lower priority skipped: " + plugin.ID);
+			return;
+		}
+	}
 
 	// Remove existing plugin
 	this.removePlugin(plugin.ID);

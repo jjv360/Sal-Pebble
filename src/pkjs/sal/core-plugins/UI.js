@@ -11,6 +11,7 @@ module.exports = function SalUIPlugin(sal) {
 	this.description = "Displays a user interface in the Pebble app.";
 	this.version = 1;
 	this.author = "jjv360";
+	this.priority = 10;
 	this.dependencies = [];
 	this.capabilities = ["core.ui"];
 	this.appContinuationURL = "";
@@ -125,21 +126,21 @@ module.exports.prototype.alert = function(title, text) {
 
 /** Open URL. NOTE: This will only work from within the context of Pebble's showConfiguration callback! */
 module.exports.prototype.openURL = function(url) {
-	
+
 	// Check if in the show config context
 	if (!window.PebbleShowConfigContext)
 		return;
-	
+
 	// Add our params to the URL
 	url += (url.indexOf("?") == -1 ? "?" : "&") + "s_eventMode=pebble";
-	
+
 	// Open it
 	console.log("Opening: " + url);
 	Pebble.openURL(url);
-	
+
 	// Return window instance
 	return new UIWindow();
-	
+
 };
 
 // /** Show content */
