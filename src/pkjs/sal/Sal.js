@@ -146,7 +146,7 @@ module.exports.prototype.addPlugin = function(plugin) {
 	// Check if there's an existing plugin with a higher priority
 	for (var i = 0 ; i < this.plugins.length ; i++) {
 		var pl = this.plugins[i];
-		if (plugin.ID == pl.ID && (plugin.priority || 0) > (pl.priority || 0)) {
+		if (plugin.ID == pl.ID && (plugin.priority || 0) < (pl.priority || 0)) {
 			console.log("Plugin with lower priority skipped: " + plugin.ID);
 			return;
 		}
